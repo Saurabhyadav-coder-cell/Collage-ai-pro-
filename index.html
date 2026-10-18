@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CollegeAI Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #070b17;
+            --sidebar-bg: #0b1120;
+            --card-bg: rgba(18, 26, 47, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-blue: #2563eb;
+            --accent-purple: #7c3aed;
+            --accent-cyan: #06b6d4;
+            --text-main: #eef2ff;
+            --text-muted: #8e98b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; padding: 8px; margin-bottom: 20px; }
+        .brand-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 14px; display: grid; place-items: center; font-size: 20px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+        .brand-text h2 { font-size: 18px; font-weight: 800; background: linear-gradient(90deg, #fff, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-text p { font-size: 11px; color: var(--text-muted); }
+
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .nav-item button {
+            width: 100%; display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+            color: var(--text-muted); background: transparent; border: 1px solid transparent;
+            border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; text-align: left;
+            transition: all 0.3s ease;
+        }
+        .nav-item.active button, .nav-item button:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.1));
+            color: #fff; border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .sidebar-bot-card {
+            margin-top: auto; background: rgba(17, 24, 39, 0.8);
+            border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; text-align: center;
+        }
+        .sidebar-bot-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 8px; transform: perspective(1000px) rotateY(-5deg); transition: transform 0.3s ease; }
+        .sidebar-bot-card:hover img { transform: perspective(1000px) rotateY(0deg) scale(1.03); }
+        .status-indicator { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: #10b981; font-weight: 600; }
+        .dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
+
+        /* --- MAIN WRAPPER --- */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header {
+            height: 70px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--card-border); background: rgba(8, 12, 25, 0.5); backdrop-filter: blur(10px);
+        }
+        .search-bar { position: relative; width: 450px; }
+        .search-bar input {
+            width: 100%; padding: 10px 16px 10px 42px; background: rgba(17, 24, 39, 0.7);
+            border: 1px solid var(--card-border); border-radius: 20px; color: #fff; outline: none; font-size: 13px;
+        }
+        .search-bar i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .icon-btn { background: rgba(17, 24, 39, 0.7); border: 1px solid var(--card-border); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; position: relative; }
+        .badge-dot { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: rgba(17, 24, 39, 0.7); padding: 4px 12px 4px 4px; border-radius: 20px; border: 1px solid var(--card-border); }
+        .user-profile img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .pro-badge { background: linear-gradient(135deg, #f59e0b, #d97706); padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; }
+
+        /* --- PAGES SYSTEM --- */
+        .page { display: none; padding: 24px; }
+        .page.active { display: block; }
+        .dashboard-layout { display: grid; grid-template-columns: 2.8fr 1fr; gap: 20px; }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(20, 25, 55, 0.9), rgba(10, 15, 35, 0.9)), 
+                        url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80');
+            background-size: cover; background-blend-mode: overlay; border-radius: 24px; padding: 32px;
+            border: 1px solid rgba(99, 102, 241, 0.3); display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.3);
+        }
+        .hero-content { max-width: 55%; }
+        .tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); padding: 4px 12px; border-radius: 12px; font-size: 12px; color: #93c5fd; margin-bottom: 12px; }
+        .hero-content h1 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+        .hero-content h1 span { background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-content p { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
+        .feature-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .pill { font-size: 11px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); padding: 4px 10px; border-radius: 8px; color: #d1d5db; }
+        .cta-btn { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s ease; }
+        .cta-btn:hover { transform: translateY(-2px); }
+
+        .hero-3d-visual { position: relative; width: 220px; height: 180px; display: flex; justify-content: center; align-items: center; }
+        .hero-3d-visual img.main-char { width: 170px; height: 170px; border-radius: 20px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.2); box-shadow: 0 15px 15px rgba(0,0,0,0.6); }
+
+
+        /* --- COLLEGE AI PRO 3D IMAGE STREAM HERO --- */
+        .image-stream-hero {
+            position: relative;
+            width: 390px;
+            height: 220px;
+            overflow: hidden;
+            border-radius: 22px;
+            perspective: 900px;
+            perspective-origin: 50% 55%;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(59,130,246,.20), transparent 45%),
+                rgba(3, 7, 18, .30);
+            border: 1px solid rgba(147,197,253,.16);
+            flex-shrink: 0;
+        }
+
+        .image-stream-hero .stream-axis {
+            position: absolute;
+            inset: 0;
+            transform-style: preserve-3d;
+        }
+
+        .image-stream-hero .stream-card {
+            position: absolute;
+            left: 50%;
+            top: 55%;
+            width: 72px;
+            height: 100px;
+            margin-left: -36px;
+            margin-top: -50px;
+            overflow: hidden;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,.20);
+            box-shadow: 0 12px 30px rgba(0,0,0,.42);
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            animation: collegeAiStream 18s linear infinite;
+            will-change: transform;
+        }
+
+        .image-stream-hero .stream-card.left {
+            animation-name: collegeAiStreamLeft;
+        }
+
+        .image-stream-hero .stream-card img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .image-stream-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 55%, transparent 25%, rgba(7,11,23,.22) 75%);
+        }
+
+        @keyframes collegeAiStream {
+            0% {
+                transform: translate3d(-11cqw,0,0cqw) rotateY(-6deg) scale(.026);
+            }
+            4% {
+                transform: translate3d(-1.3cqw,0,8.4cqw) rotateY(-6.9deg) scale(.036);
+            }
+            8% {
+                transform: translate3d(11.7cqw,0,15.8cqw) rotateY(-7.8deg) scale(.050);
+            }
+            12% {
+                transform: translate3d(21.8cqw,0,21.7cqw) rotateY(-8.6deg) scale(.070);
+            }
+            16% {
+                transform: translate3d(29.1cqw,0,26.5cqw) rotateY(-9.5deg) scale(.097);
+            }
+            20% {
+                transform: translate3d(34.4cqw,0,30.4cqw) rotateY(-10.4deg) scale(.134);
+            }
+            25% {
+                transform: translate3d(38.1cqw,0,34.2cqw) rotateY(-11.5deg) scale(.185);
+            }
+            30% {
+                transform: translate3d(40.6cqw,0,37.0cqw) rotateY(-12.6deg) scale(.255);
+            }
+            35% {
+                transform: translate3d(42.2cqw,0,39.0cqw) rotateY(-13.7deg) scale(.352);
+            }
+            40% {
+                transform: translate3d(43.0cqw,0,40.4cqw) rotateY(-14.8deg) scale(.486);
+            }
+            45% {
+                transform: translate3d(43.5cqw,0,41.4cqw) rotateY(-15.9deg) scale(.670);
+            }
+            50% {
+                transform: translate3d(43.8cqw,0,42.1cqw) rotateY(-17deg) scale(.925);
+            }
+            55% {
+                transform: translate3d(44cqw,0,42.6cqw) rotateY(-18.2deg) scale(1.27);
+            }
+            60% {
+                transform: translate3d(44cqw,0,43.0cqw) rotateY(-19.3deg) scale(1.75);
+            }
+            65% {
+                transform: translate3d(44cqw,0,43.3cqw) rotateY(-20.4deg) scale(2.42);
+            }
+            70% {
+                transform: translate3d(44cqw,0,43.5cqw) rotateY(-21.5deg) scale(3.33);
+            }
+            75% {
+                transform: translate3d(44cqw,0,43.7cqw) rotateY(-22.5deg) scale(4.60);
+            }
+            80% {
+                transform: translate3d(44cqw,0,43.8cqw) rotateY(-23.6deg) scale(6.35);
+            }
+            85% {
+                transform: translate3d(44cqw,0,43.9cqw) rotateY(-24.7deg) scale(8.75);
+            }
+            90% {
+                transform: translate3d(44cqw,0,44.0cqw) rotateY(-25.8deg) scale(12.08);
+            }
+            95%, 100% {
+                transform: translate3d(44cqw,0,44.0cqw) rotateY(-28deg) scale(17.04);
+            }
+        }
+
+        @keyframes collegeAiStreamLeft {
+            0% {
+                transform: translate3d(11cqw,0,0cqw) rotateY(6deg) scale(.026);
+            }
+            4% {
+                transform: translate3d(1.3cqw,0,8.4cqw) rotateY(6.9deg) scale(.036);
+            }
+            8% {
+                transform: translate3d(-11.7cqw,0,15.8cqw) rotateY(7.8deg) scale(.050);
+            }
+            12% {
+                transform: translate3d(-21.8cqw,0,21.7cqw) rotateY(8.6deg) scale(.070);
+            }
+            16% {
+                transform: translate3d(-29.1cqw,0,26.5cqw) rotateY(9.5deg) scale(.097);
+            }
+            20% {
+                transform: translate3d(-34.4cqw,0,30.4cqw) rotateY(10.4deg) scale(.134);
+            }
+            25% {
+                transform: translate3d(-38.1cqw,0,34.2cqw) rotateY(11.5deg) scale(.185);
+            }
+            30% {
+                transform: translate3d(-40.6cqw,0,37.0cqw) rotateY(12.6deg) scale(.255);
+            }
+            35% {
+                transform: translate3d(-42.2cqw,0,39.0cqw) rotateY(13.7deg) scale(.352);
+            }
+            40% {
+                transform: translate3d(-43.0cqw,0,40.4cqw) rotateY(14.8deg) scale(.486);
+            }
+            45% {
+                transform: translate3d(-43.5cqw,0,41.4cqw) rotateY(15.9deg) scale(.670);
+            }
+            50% {
+                transform: translate3d(-43.8cqw,0,42.1cqw) rotateY(17deg) scale(.925);
+            }
+            55% {
+                transform: translate3d(-44cqw,0,42.6cqw) rotateY(18.2deg) scale(1.27);
+            }
+            60% {
+                transform: translate3d(-44cqw,0,43.0cqw) rotateY(19.3deg) scale(1.75);
+            }
+            65% {
+                transform: translate3d(-44cqw,0,43.3cqw) rotateY(20.4deg) scale(2.42);
+            }
+            70% {
+                transform: translate3d(-44cqw,0,43.5cqw) rotateY(21.5deg) scale(3.33);
+            }
+            75% {
+                transform: translate3d(-44cqw,0,43.7cqw) rotateY(22.5deg) scale(4.60);
+            }
+            80% {
+                transform: translate3d(-44cqw,0,43.8cqw) rotateY(23.6deg) scale(6.35);
+            }
+            85% {
+                transform: translate3d(-44cqw,0,43.9cqw) rotateY(24.7deg) scale(8.75);
+            }
+            90% {
+                transform: translate3d(-44cqw,0,44.0cqw) rotateY(25.8deg) scale(12.08);
+            }
+            95%, 100% {
+                transform: translate3d(-44cqw,0,44.0cqw) rotateY(28deg) scale(17.04);
+            }
+        }
+
+        @media (max-width: 1050px) {
+            .image-stream-hero { width: 330px; }
+        }
+
+        @media (max-width: 760px) {
+            .hero-banner { flex-direction: column; align-items: stretch; }
+            .hero-content { max-width: 100%; }
+            .image-stream-hero { width: 100%; margin-top: 18px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .image-stream-hero .stream-card { animation-play-state: paused; }
+        }
+
+        /* Stats & Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 16px; transition: 0.3s; }
+        .stat-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-2px); }
+        .stat-img { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; }
+        .stat-info h3 { font-size: 20px; font-weight: 800; }
+        .stat-info p { font-size: 11px; color: var(--text-muted); }
+
+        .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+        .tool-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .tool-card:hover { background: rgba(23, 33, 60, 0.8); border-color: rgba(99, 102, 241, 0.5); transform: translateY(-4px); }
+        .tool-card img { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); }
+        .tool-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        .tool-card p { font-size: 10px; color: var(--text-muted); }
+
+        /* Right Panel */
+        .right-sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .chat-widget { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; height: 380px; }
+        .chat-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 12px; }
+        .chat-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 12px; line-height: 1.4; white-space: pre-wrap; }
+        .chat-msg.me { margin-left: auto; background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
+        .chat-msg.ai { background: rgba(31, 41, 55, 0.7); border: 1px solid var(--card-border); }
+        .chat-input { position: relative; margin-top: 10px; }
+        .chat-input input { width: 100%; padding: 10px 36px 10px 12px; background: rgba(17, 24, 39, 0.9); border: 1px solid var(--card-border); border-radius: 10px; color: #fff; font-size: 11px; outline: none; }
+        .chat-input button { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: var(--accent-blue); border: none; color: white; width: 24px; height: 24px; border-radius: 6px; cursor: pointer; display: grid; place-items: center; }
+
+        /* Quiz Controls & Formatting */
+        .quiz-controls { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn { background: rgba(17, 24, 39, 0.8); border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .filter-btn.active, .filter-btn:hover { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+        .subject-tag { display: inline-block; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; font-size: 10px; padding: 2px 8px; border-radius: 6px; margin-bottom: 8px; }
+        .quiz-q { background: rgba(21, 29, 52, 0.8); border: 1px solid var(--card-border); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
+        .quiz-q label { display: block; margin-top: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+        .quiz-q input[type="radio"] { margin-right: 8px; }
+        .explanation { margin-top: 10px; padding: 10px; background: rgba(30, 41, 59, 0.6); border-left: 3px solid var(--accent-blue); border-radius: 4px; font-size: 12px; color: #cbd5e1; display: none; }
+
+        /* Forms & Cards */
+        .form-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; margin-top: 15px; }
+        .input-field { width: 100%; padding: 12px; background: rgba(11, 18, 34, 0.8); border: 1px solid var(--card-border); border-radius: 10px; color: #fff; margin-bottom: 10px; outline: none; }
+        .primary-btn { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: 0; color: #fff; padding: 10px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .primary-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .note-item { background: rgba(21, 29, 52, 0.8); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+
+        .promo-card { background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(37, 99, 235, 0.3)); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; }
+        .promo-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+
+        /* Full-stack auth + API status */
+        .auth-overlay{position:fixed;inset:0;background:rgba(3,7,18,.82);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;z-index:100}
+        .auth-overlay.show{display:flex}
+        .auth-card{width:min(420px,92vw);background:rgba(15,23,42,.96);border:1px solid rgba(147,197,253,.18);border-radius:24px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+        .auth-tabs{display:flex;gap:8px;margin:15px 0}.auth-tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:transparent;color:#94a3b8;cursor:pointer}.auth-tabs button.active{background:#2563eb;color:#fff}
+        .auth-msg{font-size:12px;color:#fca5a5;min-height:18px;margin:6px 0}
+        .api-status{font-size:10px;color:#94a3b8;margin-top:8px}.api-status.online{color:#34d399}
+        .logout-btn{background:transparent;border:0;color:#94a3b8;cursor:pointer;font-size:11px}
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="brand-text">
+                    <h2>CollegeAI Pro</h2>
+                    <p>Your AI Study Companion</p>
+                </div>
+            </div>
+
+            <ul class="nav-list">
+                <li class="nav-item active"><button onclick="page('home', this)"><i class="fa-solid fa-house"></i> Dashboard</button></li>
+                <li class="nav-item"><button onclick="page('chat', this)"><i class="fa-solid fa-comment-dots"></i> AI Chat</button></li>
+                <li class="nav-item"><button onclick="page('tools', this)"><i class="fa-solid fa-screwdriver-wrench"></i> Study Tools</button></li>
+                <li class="nav-item"><button onclick="page('quiz', this)"><i class="fa-solid fa-circle-question"></i> Quiz & MCQ</button></li>
+                <li class="nav-item"><button onclick="page('notes', this)"><i class="fa-solid fa-note-sticky"></i> My Notes</button></li>
+                <li class="nav-item"><button onclick="page('planner', this)"><i class="fa-solid fa-calendar-days"></i> Study Planner</button></li>
+                <li class="nav-item"><button onclick="page('project', this)"><i class="fa-solid fa-circle-info"></i> Project Info</button></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-bot-card">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80" alt="Students Studying">
+            <div class="status-indicator"><span class="dot"></span> Online</div>
+            <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Always here to help you!</p>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <header>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search anything... (e.g., Python, DBMS, Projects...)">
+            </div>
+            <div class="header-actions">
+                <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="badge-dot"></span></div>
+                <div class="user-profile">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Student Profile">
+                    <span id="userName" style="font-size: 12px; font-weight: 600;">Guest</span>
+                    <span class="pro-badge">PRO</span><button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE 1: DASHBOARD -->
+        <section id="home" class="page active">
+            <div class="dashboard-layout">
+                <div class="left-container">
+                    <div class="hero-banner">
+                        <div class="hero-content">
+                            <div class="tag"><i class="fa-solid fa-sparkles"></i> Welcome to</div>
+                            <h1>College<span>AI Pro</span></h1>
+                            <p>Your All-in-One AI Companion for Study, Projects, Code & More!</p>
+                            <div class="feature-pills">
+                                <span class="pill"><i class="fa-solid fa-check" style="color: #10b981;"></i> Get Answers</span>
+                                <span class="pill"><i class="fa-solid fa-check" style="color: #10b981;"></i> Create Projects</span>
+                                <span class="pill"><i class="fa-solid fa-check" style="color: #10b981;"></i> Write Code</span>
+                            </div>
+                            <button class="cta-btn" onclick="page('chat')">Start Chatting <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="image-stream-hero" aria-label="Animated 3D study image stream">
+                            <div class="stream-axis" id="collegeAiStream"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <img class="stat-img" src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=200&q=80" alt="Student Notes">
+                            <div class="stat-info"><h3 id="noteCount">0</h3><p>Saved Notes</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <img class="stat-img" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=200&q=80" alt="Student Laptop Quiz">
+                            <div class="stat-info"><h3 id="quizBest">0%</h3><p>Best Quiz Score</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <img class="stat-img" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=200&q=80" alt="Students Working">
+                            <div class="stat-info"><h3>24/7</h3><p>Local AI Engine</p></div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 24px 0 0 0;">
+                        <h2 style="font-size: 16px;">Popular Subjects</h2>
+                    </div>
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="ask('Explain computer networking fundamentals')">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" alt="Networking Student">
+                            <h4>Networking</h4>
+                            <p>TCP/IP, OSI Layers & Routers</p>
+                        </div>
+                        <div class="tool-card" onclick="ask('Teach me cybersecurity fundamentals')">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Cybersecurity Student">
+                            <h4>Cybersecurity</h4>
+                            <p>Encryption, Threats & Firewalls</p>
+                        </div>
+                        <div class="tool-card" onclick="ask('Explain DBMS and SQL architecture')">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80" alt="DBMS Student">
+                            <h4>DBMS & SQL</h4>
+                            <p>Normalization, Keys & Queries</p>
+                        </div>
+                        <div class="tool-card" onclick="ask('Explain Operating Systems and Process Scheduling')">
+                            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="OS Student">
+                            <h4>Operating Systems</h4>
+                            <p>Threads, Memory & Scheduling</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-sidebar">
+                    <div class="chat-widget">
+                        <div class="chat-header">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 28px; height: 28px; background: #3b82f6; border-radius: 50%; display: grid; place-items: center;"><i class="fa-solid fa-robot" style="font-size: 12px;"></i></div>
+                                <div><h4 style="font-size: 12px;">Chat Assistant</h4><span style="font-size: 10px; color: #10b981;">● Online</span></div>
+                            </div>
+                        </div>
+                        <div id="sideChatLog" class="chat-body">
+                            <div class="chat-msg ai">Hi Saurabh! 👋 Ask me anything about your studies or subjects.</div>
+                        </div>
+                        <div class="chat-input">
+                            <input id="sidePrompt" type="text" placeholder="Ask something..." onkeydown="if(event.key==='Enter') sendSide()">
+                            <button onclick="sendSide()"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="promo-card">
+                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=200&q=80" alt="Grad Student">
+                        <div>
+                            <h4 style="font-size: 12px;">Big Dreams Need Smart Tools 🚀</h4>
+                            <p style="font-size: 10px; color: var(--text-muted);">Keep Learning • Keep Growing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 2: AI CHAT -->
+        <section id="chat" class="page">
+            <h2>AI Assistant Hub</h2>
+            <div class="form-card" style="height: 68vh; display: flex; flex-direction: column;">
+                <div id="fullChatLog" class="chat-body" style="flex: 1;">
+                    <div class="chat-msg ai">Welcome to CollegeAI Pro Assistant! Ask detailed questions about Computer Networking, Cybersecurity, DBMS, Operating Systems, or Python.</div>
+                </div>
+                <div class="chat-input" style="margin-top: 15px;">
+                    <input id="fullPrompt" type="text" placeholder="Type your academic query..." onkeydown="if(event.key==='Enter') sendFull()">
+                    <button onclick="sendFull()" style="width: 32px; height: 32px; right: 4px;"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 3: STUDY TOOLS -->
+        <section id="tools" class="page">
+            <h2>Study Tools Suite</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Select a specialized tool to streamline your work.</p>
+            <div class="tools-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="tool-card" onclick="ask('Summarize computer architecture for exams')">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=200&q=80" alt="Student Notes">
+                    <h4>Quick Notes Generator</h4>
+                    <p>Convert core subject concepts into quick exam notes</p>
+                </div>
+                <div class="tool-card" onclick="ask('Give me 5 interview preparation questions on Operating Systems')">
+                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80" alt="Student Studying">
+                    <h4>Question Generator</h4>
+                    <p>Generate practice technical questions for interviews</p>
+                </div>
+                <div class="tool-card" onclick="ask('Explain Python code structure and syntax')">
+                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=200&q=80" alt="Coding Student">
+                    <h4>Code Tutor</h4>
+                    <p>Learn programming syntax, logic, and OOP</p>
+                </div>
+                <div class="tool-card" onclick="ask('Write a professional resume summary for CS student')">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=200&q=80" alt="Student Resume">
+                    <h4>Resume Assistant</h4>
+                    <p>Build high-impact summaries for CVs</p>
+                </div>
+                <div class="tool-card" onclick="page('notes')">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=200&q=80" alt="Notes Manager">
+                    <h4>Notes Manager</h4>
+                    <p>Save & review your subject notes</p>
+                </div>
+                <div class="tool-card" onclick="page('planner')">
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=200&q=80" alt="Planner Student">
+                    <h4>Schedule Builder</h4>
+                    <p>Generate balanced multi-subject plans</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 4: QUIZ & MCQ -->
+        <section id="quiz" class="page">
+            <h2>Interactive Quiz & MCQ</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Filter by subject to test your knowledge (15 MCQs per subject).</p>
+            
+            <div class="quiz-controls">
+                <button class="filter-btn active" onclick="filterQuiz('All', this)">All Subjects</button>
+                <button class="filter-btn" onclick="filterQuiz('Networking', this)">Networking</button>
+                <button class="filter-btn" onclick="filterQuiz('Cybersecurity', this)">Cybersecurity</button>
+                <button class="filter-btn" onclick="filterQuiz('DBMS', this)">DBMS</button>
+                <button class="filter-btn" onclick="filterQuiz('Operating Systems', this)">Operating Systems</button>
+                <button class="filter-btn" onclick="filterQuiz('Python', this)">Python</button>
+            </div>
+
+            <div id="quizbox"></div>
+            <button class="primary-btn" onclick="gradeQuiz()">Submit Answers</button>
+            <div id="quizResult" style="margin-top: 15px; font-weight: 700; font-size: 18px;"></div>
+        </section>
+
+        <!-- PAGE 5: MY NOTES -->
+        <section id="notes" class="page">
+            <h2>My Notes</h2>
+            <div class="dashboard-layout" style="margin-top: 15px;">
+                <div class="form-card">
+                    <input class="input-field" id="ntitle" placeholder="Note Title (e.g., DBMS Normalization)">
+                    <textarea class="input-field" id="ntext" rows="6" placeholder="Write your subject revision notes here..."></textarea>
+                    <button class="primary-btn" onclick="saveNote()">Save Note</button>
+                </div>
+                <div>
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Saved Notes</h3>
+                    <div id="notesList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 6: PLANNER -->
+        <section id="planner" class="page">
+            <h2>Study Planner</h2>
+            <div class="form-card">
+                <input class="input-field" id="subject" placeholder="Subject Name (e.g., Operating Systems & DBMS)">
+                <input class="input-field" id="days" type="number" min="1" max="30" value="7" placeholder="Days">
+                <input class="input-field" id="hours" type="number" min="1" max="12" value="2" placeholder="Hours per day">
+                <button class="primary-btn" onclick="makePlan()">Generate Plan</button>
+                <div id="plan" style="margin-top: 20px;"></div>
+            </div>
+        </section>
+
+        <!-- PAGE 7: PROJECT INFO -->
+        <section id="project" class="page">
+            <h2>Project Information</h2>
+            <div class="form-card">
+                <h3 style="margin-bottom: 8px;">🎓 CollegeAI Pro Overview</h3>
+                <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6;">
+                    CollegeAI Pro is designed to help students master core Computer Science subjects including Computer Networks, Cybersecurity, DBMS, Operating Systems, and Python. Features include dynamic multi-subject MCQ testing with explanations across 75 total questions, an interactive AI assistant response engine, notes storage, and study schedule planning.
+                </p>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <span class="pill">HTML5 Single Page App</span>
+                    <span class="pill">75 Question Database</span>
+                    <span class="pill">Detailed Answer Explanations</span>
+                    <span class="pill">LocalStorage API</span>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+
+        /* --- 3D IMAGE STREAM HERO --- */
+        const streamImages = [
+            "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=500&q=80",
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=500&q=80",
+            "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80",
+            "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=500&q=80",
+            "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=500&q=80",
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80"
+        ];
+
+        function buildImageStream() {
+            const stream = document.getElementById("collegeAiStream");
+            if (!stream) return;
+
+            const cardsPerRail = 8;
+            stream.innerHTML = "";
+
+            ["right", "left"].forEach(side => {
+                for (let i = 0; i < cardsPerRail; i++) {
+                    const card = document.createElement("div");
+                    card.className = `stream-card ${side}`;
+                    card.style.animationDelay = `${-(i * 18 / cardsPerRail)}s`;
+
+                    const img = document.createElement("img");
+                    img.src = streamImages[i % streamImages.length];
+                    img.alt = "CollegeAI Pro study visual";
+                    img.loading = "lazy";
+                    img.draggable = false;
+
+                    card.appendChild(img);
+                    stream.appendChild(card);
+                }
+            });
+        }
+
+        const $ = id => document.getElementById(id);
+        let activeSubject = 'All';
+
+        function page(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            $(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if(btn) {
+                btn.parentElement.classList.add('active');
+            } else {
+                let navBtns = document.querySelectorAll('.nav-item button');
+                navBtns.forEach(b => {
+                    if(b.getAttribute('onclick').includes(`'${id}'`)) {
+                        b.parentElement.classList.add('active');
+                    }
+                });
+            }
+
+            if(id === 'notes') renderNotes();
+            if(id === 'quiz') renderQuiz();
+            updateStats();
+        }
+
+        // Subject Details Knowledge Base
+        function answer(q) {
+            let x = q.toLowerCase();
+            
+            if(x.includes("tcp") || x.includes("network")) {
+                return "🌐 **Computer Networking Summary**:\n" +
+                       "• **OSI Model Layers**: Physical, Data Link, Network, Transport, Session, Presentation, Application.\n" +
+                       "• **TCP vs UDP**: TCP is connection-oriented with guaranteed delivery (3-way handshake). UDP is connectionless and lightweight.\n" +
+                       "• **Key Protocols**: HTTP/HTTPS (Web), IP (Routing), ARP (MAC Resolution), DNS (Domain Name Resolution).";
+            }
+            if(x.includes("cyber") || x.includes("security")) {
+                return "🛡️ **Cybersecurity Fundamentals**:\n" +
+                       "• **CIA Triad**: Confidentiality (Encryption), Integrity (Hashing/Digital Signatures), Availability (Redundancy/DDoS Defense).\n" +
+                       "• **Symmetric vs Asymmetric**: Symmetric uses 1 key (AES). Asymmetric uses Public/Private key pairs (RSA).\n" +
+                       "• **Common Threats**: Phishing, SQL Injection (SQLi), Cross-Site Scripting (XSS), Man-in-the-Middle (MitM).";
+            }
+            if(x.includes("dbms") || x.includes("sql")) {
+                return "🗄️ **Database Management Systems**:\n" +
+                       "• **ACID Properties**: Atomicity, Consistency, Isolation, Durability.\n" +
+                       "• **Normalization**: 1NF (Atomic values), 2NF (Remove Partial Dependencies), 3NF (Remove Transitive Dependencies).\n" +
+                       "• **Keys**: Primary Key (Unique Identifier), Foreign Key (Refers to Primary Key in another table).";
+            }
+            if(x.includes("os") || x.includes("operating system") || x.includes("process")) {
+                return "💻 **Operating Systems**:\n" +
+                       "• **Process vs Thread**: A process is an independent program in execution. A thread is a lightweight execution unit inside a process.\n" +
+                       "• **Scheduling Algorithms**: FCFS, Round Robin (Time Quantum), Shortest Job First (SJF), Priority Scheduling.\n" +
+                       "• **Deadlock Conditions**: Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait.";
+            }
+            if(x.includes("python") || x.includes("oop")) {
+                return "🐍 **Python & OOP Concepts**:\n" +
+                       "• **4 OOP Pillars**: Encapsulation, Abstraction, Inheritance, Polymorphism.\n" +
+                       "• **Data Structures**: Lists (Mutable ordered), Tuples (Immutable ordered), Sets (Unique unordered), Dicts (Key-Value pairs).\n" +
+                       "• **Memory**: Managed via automatic garbage collection and reference counting.";
+            }
+            if(x.includes("resume")) {
+                return "📄 **CS Resume Blueprint**:\n" +
+                       "• **Section Order**: Education -> Technical Skills -> Projects -> Experience/Certifications.\n" +
+                       "• **Key Details**: Highlight languages (Python, SQL, C++) and core frameworks. Quantify achievements (e.g., 'Reduced query latency by 30%').";
+            }
+            if(x.includes("interview")) {
+                return "💼 **Top Interview Questions**:\n" +
+                       "1. Explain Deadlock and how to prevent it.\n" +
+                       "2. Difference between TCP and UDP.\n" +
+                       "3. What is 3NF Normalization in DBMS?\n" +
+                       "4. How does garbage collection work in Python?";
+            }
+            return "🧠 Answer regarding: '" + q + "'\nSelect or ask about specific subjects like Networking, Cybersecurity, DBMS, OS, or Python for detailed summaries.";
+        }
+
+        function ask(q) {
+            page('chat');
+            $('fullPrompt').value = q;
+            sendFull();
+        }
+
+        function sendSide() {
+            let p = $('sidePrompt'), log = $('sideChatLog'), txt = p.value.trim();
+            if(!txt) return;
+            log.innerHTML += `<div class="chat-msg me">${txt}</div>`;
+            p.value = '';
+            setTimeout(() => {
+                log.innerHTML += `<div class="chat-msg ai">${answer(txt)}</div>`;
+                log.scrollTop = log.scrollHeight;
+            }, 300);
+        }
+
+        function sendFull() {
+            let p = $('fullPrompt'), log = $('fullChatLog'), txt = p.value.trim();
+            if(!txt) return;
+            log.innerHTML += `<div class="chat-msg me">${txt}</div>`;
+            p.value = '';
+            setTimeout(() => {
+                log.innerHTML += `<div class="chat-msg ai">${answer(txt)}</div>`;
+                log.scrollTop = log.scrollHeight;
+            }, 300);
+        }
+
+        /* 75 MCQs total: 15 questions per subject with detailed explanations */
+        const qs = [
+            // NETWORKING (15 Questions)
+            ["Networking", "Which protocol works at the Transport Layer and guarantees connection-oriented packet delivery?", ["UDP", "TCP", "IP", "ARP"], 1, "TCP establishes a reliable connection using a 3-way handshake (SYN, SYN-ACK, ACK) before transferring data."],
+            ["Networking", "What is the default port number used by HTTP?", ["21", "22", "80", "443"], 2, "Port 80 is standard for unencrypted HTTP web traffic, while Port 443 is reserved for encrypted HTTPS."],
+            ["Networking", "Which OSI layer is responsible for routing data packets across different subnets?", ["Data Link Layer", "Network Layer", "Transport Layer", "Session Layer"], 1, "The Network Layer (Layer 3) handles IP addressing, packet creation, and logical routing."],
+            ["Networking", "What is the subnet mask for a standard IPv4 Class C network?", ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.255"], 2, "Class C networks reserve 24 bits for the network ID, yielding a mask of 255.255.255.0."],
+            ["Networking", "Which protocol resolves IP addresses to physical MAC addresses?", ["DNS", "DHCP", "ARP", "ICMP"], 2, "Address Resolution Protocol (ARP) maps a network layer IP address to a local Data Link layer MAC address."],
+            ["Networking", "How long is an IPv6 address?", ["32 bits", "64 bits", "128 bits", "256 bits"], 2, "IPv6 addresses are 128 bits long, written as hexadecimal groups separated by colons."],
+            ["Networking", "Which device operates at Layer 2 of the OSI model?", ["Hub", "Switch", "Router", "Repeater"], 1, "A network switch operates at Layer 2 (Data Link) and forwards data based on MAC addresses."],
+            ["Networking", "Which protocol automatically assigns dynamic IP addresses to network hosts?", ["DNS", "DHCP", "SNMP", "SMTP"], 1, "Dynamic Host Configuration Protocol (DHCP) automatically configures IP settings for clients."],
+            ["Networking", "What mechanism does TCP use for flow control to prevent receiver overflow?", ["Sliding Window", "Parity Check", "CSMA/CD", "Token Passing"], 0, "TCP uses the Sliding Window algorithm to dynamically control the flow of data packets."],
+            ["Networking", "Which protocol is used by the 'ping' command to test network connectivity?", ["IGMP", "ICMP", "TCP", "UDP"], 1, "Ping utilizes Internet Control Message Protocol (ICMP) Echo Request and Reply messages."],
+            ["Networking", "What topology connects every node to a central device like a switch or hub?", ["Bus", "Ring", "Star", "Mesh"], 2, "In a Star topology, all network nodes are connected individually to a central hub or switch."],
+            ["Networking", "At which OSI layer does data encryption and compression primarily take place?", ["Application", "Presentation", "Session", "Transport"], 1, "The Presentation Layer (Layer 6) translates, encrypts, and compresses data formats."],
+            ["Networking", "Which port is used by SSH (Secure Shell) for encrypted remote administration?", ["20", "22", "23", "25"], 1, "SSH uses TCP port 22. Telnet uses port 23 for unencrypted connections."],
+            ["Networking", "What medium access mechanism is standard on wired Ethernet networks?", ["CSMA/CA", "CSMA/CD", "TDMA", "CDMA"], 1, "Ethernet uses Carrier Sense Multiple Access with Collision Detection (CSMA/CD)."],
+            ["Networking", "Which protocol is used to transfer web pages securely across the Internet?", ["FTP", "HTTP", "HTTPS", "SFTP"], 2, "HTTPS secures HTTP communication by encrypting data with SSL/TLS over port 443."],
+
+            // CYBERSECURITY (15 Questions)
+            ["Cybersecurity", "What does the 'I' in the CIA Triad stand for?", ["Identification", "Integrity", "Inspection", "Isolation"], 1, "Integrity ensures data remains accurate, authentic, unaltered, and protected from unauthorized modification."],
+            ["Cybersecurity", "Which cryptographic algorithm uses symmetric key encryption?", ["RSA", "AES", "ECC", "Diffie-Hellman"], 1, "AES (Advanced Encryption Standard) uses a single shared secret key for encryption and decryption."],
+            ["Cybersecurity", "What vulnerability occurs when raw input is directly concatenated into a database query?", ["XSS", "SQL Injection", "CSRF", "Buffer Overflow"], 1, "SQL Injection allows malicious input to manipulate database SQL queries."],
+            ["Cybersecurity", "Which attack involves flooding a target system to render it unavailable to users?", ["Phishing", "DDoS", "Man-in-the-Middle", "Spoofing"], 1, "Distributed Denial of Service (DDoS) overpowers resources with massive traffic to disrupt service."],
+            ["Cybersecurity", "What type of malware encrypts user files and demands payment for key recovery?", ["Adware", "Ransomware", "Spyware", "Rootkit"], 1, "Ransomware locks system access or encrypts files until a ransom is paid."],
+            ["Cybersecurity", "What security mechanism uses both a password and an authenticator app code?", ["Single Sign-On", "Two-Factor Authentication (2FA)", "Hashing", "Biometrics"], 1, "2FA requires two separate identity verification factors before granting system access."],
+            ["Cybersecurity", "Which cryptographic function produces a fixed-size output and is irreversible?", ["Symmetric Encryption", "Asymmetric Encryption", "Hash Function", "Steganography"], 2, "A cryptographic hash function converts input into a unique, fixed-size output string that cannot be reversed."],
+            ["Cybersecurity", "What web attack forces an authenticated user's browser to execute unwanted actions?", ["XSS", "CSRF", "Clickjacking", "Zero-day"], 1, "Cross-Site Request Forgery (CSRF) tricks an authenticated browser into submitting malicious commands."],
+            ["Cybersecurity", "Which attack tricking users into revealing sensitive credentials via fake emails?", ["Spoofing", "Phishing", "Sniffing", "Port Scanning"], 1, "Phishing uses deceptive emails and websites to trick victims into sharing private credentials."],
+            ["Cybersecurity", "What tool monitors network traffic and filters packets based on security rules?", ["Router", "Firewall", "Switch", "Bridge"], 1, "Firewalls analyze incoming and outgoing traffic to block unauthorized network access."],
+            ["Cybersecurity", "Which asymmetric algorithm relies on the mathematical difficulty of factoring large primes?", ["AES", "DES", "RSA", "SHA-256"], 2, "RSA asymmetric encryption relies on the computational difficulty of factoring prime numbers."],
+            ["Cybersecurity", "What security practice involves hiding data inside another file like an image?", ["Encryption", "Hashing", "Steganography", "Obfuscation"], 2, "Steganography is the technique of concealing secret messages within non-secret media files."],
+            ["Cybersecurity", "Which security principle restricts user access permissions to only what is necessary for work?", ["Defense in Depth", "Least Privilege", "Zero Trust", "Separation of Duties"], 1, "The Principle of Least Privilege ensures users receive only the minimum permissions needed to perform tasks."],
+            ["Cybersecurity", "What type of attack intercepts and potentially alters communication between two parties secretly?", ["DDoS", "Man-in-the-Middle (MitM)", "SQLi", "Brute Force"], 1, "MitM attacks secretly intercept and modify data exchange between two communicating hosts."],
+            ["Cybersecurity", "What is an unpatched software vulnerability that is exploited before a vendor release called?", ["Zero-day vulnerability", "Legacy flaw", "Logic bomb", "Trapdoor"], 0, "Zero-day vulnerabilities are unknown to software vendors and lack available security patches."],
+
+            // DBMS (15 Questions)
+            ["DBMS", "Which property of ACID guarantees that all operations within a transaction complete successfully, or none are applied?", ["Atomicity", "Consistency", "Isolation", "Durability"], 0, "Atomicity follows an 'all-or-nothing' execution rule for database transactions."],
+            ["DBMS", "Which Normal Form removes transitive dependencies?", ["1NF", "2NF", "3NF", "BCNF"], 2, "3NF requires a table to be in 2NF and ensure non-key columns depend exclusively on the primary key."],
+            ["DBMS", "Which command is an example of Data Definition Language (DDL)?", ["SELECT", "INSERT", "CREATE", "UPDATE"], 2, "CREATE modifies database schema structures, making it a Data Definition Language command."],
+            ["DBMS", "Which field in a table uniquely identifies each row or record?", ["Foreign Key", "Primary Key", "Composite Key", "Candidate Key"], 1, "A Primary Key contains unique values and cannot contain NULL entries."],
+            ["DBMS", "What type of SQL JOIN returns all records when there is a match in either left or right table?", ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"], 3, "FULL OUTER JOIN yields all matching and non-matching rows from both combined tables."],
+            ["DBMS", "Which SQL command is used to remove a table and its structure permanently?", ["DELETE", "DROP", "TRUNCATE", "REMOVE"], 1, "DROP TABLE completely deletes the database structure and all stored records permanently."],
+            ["DBMS", "What dependency occurs when a non-key attribute depends on only part of a composite primary key?", ["Transitive Dependency", "Partial Dependency", "Functional Dependency", "Multi-valued Dependency"], 1, "Partial dependency occurs when an attribute depends on a subset of a composite primary key (violating 2NF)."],
+            ["DBMS", "Which relational algebra operation selects rows that satisfy a specified condition?", ["Projection (π)", "Selection (σ)", "Cartesian Product (×)", "Join (⋈)"], 1, "Selection (σ) filters tuples/rows from a relation based on a specified boolean condition."],
+            ["DBMS", "What SQL keyword is used to group rows that have the same values in specified columns?", ["ORDER BY", "GROUP BY", "HAVING", "DISTINCT"], 1, "GROUP BY aggregates data rows with identical column values for summary operations."],
+            ["DBMS", "Which clause is used to filter group results after aggregation in SQL?", ["WHERE", "HAVING", "LIKE", "ORDER BY"], 1, "HAVING filters aggregated output produced by a GROUP BY clause, whereas WHERE filters individual rows."],
+            ["DBMS", "Which transaction isolation level provides the highest level of isolation?", ["Read Uncommitted", "Read Committed", "Repeatable Read", "Serializable"], 3, "Serializable isolation prevents concurrent transaction anomalies by executing transactions sequentially."],
+            ["DBMS", "What index type preserves the physical order of data rows in a database table?", ["Clustered Index", "Non-Clustered Index", "Secondary Index", "B-Tree Index"], 0, "A Clustered Index determines the physical storage order of data rows on disk."],
+            ["DBMS", "In ER Modeling, how is a weak entity set represented visually?", ["Rectangle", "Double Rectangle", "Ellipse", "Diamond"], 1, "Weak entity sets (which depend on a strong entity for primary keys) are drawn as double rectangles."],
+            ["DBMS", "Which SQL command undoes all database changes made since the last commit?", ["ROLLBACK", "SAVEPOINT", "GRANT", "REVOKE"], 0, "ROLLBACK restores original database state by canceling pending transaction operations."],
+            ["DBMS", "What condition occurs when two transactions wait indefinitely for locks held by each other?", ["Starvation", "Deadlock", "Livelock", "Cascading Abort"], 1, "A Deadlock in DBMS occurs when circular wait locks block transactions from progressing."],
+
+            // OPERATING SYSTEMS (15 Questions)
+            ["Operating Systems", "Which condition is NOT required for a Deadlock to occur?", ["Mutual Exclusion", "Hold and Wait", "Preemption Allowed", "Circular Wait"], 2, "Deadlocks require 'No Preemption'. Allowing preemption permits resource reclaiming, resolving deadlocks."],
+            ["Operating Systems", "What scheduling algorithm assigns a fixed time quantum to each process sequentially?", ["Shortest Job First", "Round Robin", "Priority Scheduling", "FCFS"], 1, "Round Robin uses preemptive scheduling with fixed time quanta for balanced CPU allocation."],
+            ["Operating Systems", "What is virtual memory primarily used for?", ["Speeding up execution", "Extending available address space beyond physical RAM", "Encrypting files", "Replacing Cache"], 1, "Virtual memory utilizes secondary disk storage to simulate additional RAM capacity."],
+            ["Operating Systems", "Which page replacement algorithm suffers from Belady's Anomaly?", ["LRU", "FIFO", "Optimal", "LFU"], 1, "First-In-First-Out (FIFO) page replacement can experience increased page faults when adding frame capacity."],
+            ["Operating Systems", "What state is a process in when it is waiting to be assigned to a CPU core?", ["Running", "Ready", "Blocked", "Terminated"], 1, "Ready processes are fully prepared to execute once allocated CPU time by the scheduler."],
+            ["Operating Systems", "What synchronization primitive uses atomic wait() and signal() operations?", ["Mutex", "Semaphore", "Monitor", "Spinlock"], 1, "Semaphores control concurrent process access using atomic wait() and signal() operations."],
+            ["Operating Systems", "What memory management technique divides physical RAM into fixed-size blocks?", ["Paging", "Segmentation", "Swapping", "Partitioning"], 0, "Paging splits physical memory into fixed-size blocks called frames."],
+            ["Operating Systems", "What term describes rapid, excessive swapping of pages between RAM and disk?", ["Paging", "Thrashing", "Caching", "Fragmentation"], 1, "Thrashing happens when the OS spends more time swapping pages than executing application processes."],
+            ["Operating Systems", "Which system call creates a new child process in Unix-based operating systems?", ["exec()", "fork()", "wait()", "exit()"], 1, "The fork() system call creates an exact duplicate child process of the caller."],
+            ["Operating Systems", "What mechanism transfers CPU control from one running process to another?", ["Context Switch", "Interrupt Handler", "System Call", "Paging"], 0, "Context switching saves current process states and loads state data for new processes."],
+            ["Operating Systems", "What section of code accesses shared variables and must be executed mutually exclusively?", ["Critical Section", "Entry Section", "Exit Section", "Remainder Section"], 0, "The Critical Section modifies shared memory and must be guarded against concurrent access race conditions."],
+            ["Operating Systems", "Which CPU scheduling algorithm minimizes average process waiting time?", ["FCFS", "Shortest Job First (SJF)", "Round Robin", "Priority"], 1, "SJF scheduling achieves mathematically optimal minimum average wait times for given process sets."],
+            ["Operating Systems", "What type of kernel runs almost all OS services in user space for modularity?", ["Monolithic Kernel", "Microkernel", "Hybrid Kernel", "Exokernel"], 1, "Microkernels move core OS services into user space, retaining minimal essential functions in kernel mode."],
+            ["Operating Systems", "What software technique reduces disk fragmentation by organizing contiguous file blocks?", ["Defragmentation", "Compaction", "Formatting", "Paging"], 0, "Defragmentation reorganizes non-contiguous disk files into continuous physical sectors."],
+            ["Operating Systems", "What hardware component signals the CPU immediately when an I/O event occurs?", ["DMA Controller", "Interrupt", "Register", "ALU"], 1, "An Interrupt signals CPU hardware to temporarily pause tasks and service urgent device drivers."],
+
+            // PYTHON (15 Questions)
+            ["Python", "Which Python data structure is ordered and immutable?", ["List", "Dictionary", "Tuple", "Set"], 2, "Tuples are indexed, ordered sequences that cannot be altered after creation."],
+            ["Python", "Which keyword is used to handle exceptions in Python?", ["catch", "except", "error", "handle"], 1, "Python uses try-except blocks to catch and manage runtime execution errors."],
+            ["Python", "What is the output of print(type([])) in Python?", ["<class 'array'>", "<class 'list'>", "<class 'tuple'>", "<class 'set'>"], 1, "Square brackets [] define Python lists, which return <class 'list'>."],
+            ["Python", "Which built-in function returns the total number of items in a list or tuple?", ["size()", "count()", "len()", "length()"], 2, "The len() function computes item length across Python sequence data structures."],
+            ["Python", "How do you define a function in Python?", ["function myFunc():", "def myFunc():", "func myFunc():", "define myFunc():"], 1, "Python uses the 'def' keyword followed by function names and parameters."],
+            ["Python", "What operator performs integer/floor division in Python?", ["/", "//", "%", "**"], 1, "The // operator performs floor division, rounding answers down to whole integers."],
+            ["Python", "Which method adds a single element to the end of an existing list?", ["add()", "push()", "append()", "insert()"], 2, "The append() method appends single items directly onto list tails."],
+            ["Python", "Which keyword in Python is used to create an anonymous inline function?", ["def", "lambda", "anonymous", "func"], 1, "Lambda keywords build single-expression anonymous functions in Python."],
+            ["Python", "What will expression bool('False') evaluate to in Python?", ["False", "True", "None", "Error"], 1, "Non-empty string objects evaluate as boolean True in Python context."],
+            ["Python", "Which Python module provides built-in support for regular expressions?", ["string", "regex", "re", "pyre"], 2, "The standard 're' module handles regular expression operations in Python."],
+            ["Python", "What method returns a copy of a string with leading and trailing whitespaces removed?", ["strip()", "clean()", "trim()", "cut()"], 0, "The strip() method removes leading and trailing whitespace characters."],
+            ["Python", "Which special method initializes new class instance attributes in Python OOP?", ["__create__()", "__init__()", "__new__()", "__construct__()"], 1, "The __init__() method serves as constructor for instantiating Python objects."],
+            ["Python", "How is single-line commentary declared in Python code?", ["// Comment", "<!-- Comment -->", "/* Comment */", "# Comment"], 3, "Python utilizes the hash symbol (#) for single-line comments."],
+            ["Python", "What is the result of 2 ** 3 in Python?", ["5", "6", "8", "9"], 2, "The ** operator performs exponentiation power calculation (2³ = 8)."],
+            ["Python", "Which variable scope keyword explicitly modifies a global variable inside a function?", ["outer", "super", "global", "nonlocal"], 2, "The 'global' keyword permits assignment modifications to global variables inside function blocks."]
+        ];
+
+        function filterQuiz(subject, btn) {
+            activeSubject = subject;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            let filtered = activeSubject === 'All' ? qs : qs.filter(q => q[0] === activeSubject);
+            
+            $('quizbox').innerHTML = filtered.map((q, i) => `
+                <div class="quiz-q" data-index="${qs.indexOf(q)}">
+                    <span class="subject-tag">${q[0]}</span>
+                    <div><b>Q${i+1}. ${q[1]}</b></div>
+                    ${q[2].map((o, j) => `
+                        <label>
+                            <input type="radio" name="q_${qs.indexOf(q)}" value="${j}"> ${o}
+                        </label>
+                    `).join('')}
+                    <div class="explanation" id="exp_${qs.indexOf(q)}">
+                        💡 <b>Explanation:</b> ${q[4]}
+                    </div>
+                </div>
+            `).join('');
+            $('quizResult').innerText = '';
+        }
+
+        function gradeQuiz() {
+            let filtered = activeSubject === 'All' ? qs : qs.filter(q => q[0] === activeSubject);
+            let score = 0;
+
+            filtered.forEach(q => {
+                let originalIndex = qs.indexOf(q);
+                let selected = document.querySelector(`input[name=q_${originalIndex}]:checked`);
+                let expDiv = $(`exp_${originalIndex}`);
+                
+                if(expDiv) expDiv.style.display = "block";
+
+                if(selected && +selected.value === q[3]) {
+                    score++;
+                }
+            });
+
+            let pct = Math.round((score / filtered.length) * 100);
+            $('quizResult').innerText = `Score: ${score}/${filtered.length} (${pct}%)`;
+            
+            localStorage.setItem('bestQuiz', Math.max(+localStorage.getItem('bestQuiz') || 0, pct));
+            updateStats();
+        }
+
+        /* Notes Logic */
+        function saveNote() {
+            let t = $('ntitle').value.trim(), n = $('ntext').value.trim();
+            if(!t || !n) return alert("Please fill both title and details.");
+            let a = JSON.parse(localStorage.getItem("notes") || "[]");
+            a.unshift({t, n, d: new Date().toLocaleDateString()});
+            localStorage.setItem("notes", JSON.stringify(a));
+            $('ntitle').value = ''; $('ntext').value = '';
+            renderNotes(); updateStats();
+        }
+
+        function renderNotes() {
+            let a = JSON.parse(localStorage.getItem("notes") || "[]");
+            $('notesList').innerHTML = a.length ? a.map((v) => `
+                <div class="note-item">
+                    <h4>${v.t}</h4>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 6px 0;">${v.n}</p>
+                    <small style="font-size: 10px; color: var(--text-muted);">${v.d}</small>
+                </div>
+            `).join('') : "<p style='color: var(--text-muted); font-size: 12px;'>No saved notes yet.</p>";
+        }
+
+        /* Planner Logic */
+        function makePlan() {
+            let s = $('subject').value.trim() || "Computer Science Core", d = +$('days').value || 7, h = +$('hours').value || 2;
+            let topics = ["Networking Protocols", "Cybersecurity Basics", "DBMS Normalization", "OS Process Scheduling", "Python OOP Principles", "SQL Queries", "Revision & MCQs"];
+            let out = `<h4 style="margin-bottom:10px;">Study Schedule for ${s} (${d} Days)</h4>`;
+            
+            for(let i=1; i<=d; i++) {
+                let topic = topics[(i - 1) % topics.length];
+                out += `<div class="note-item"><b>Day ${i}:</b> Focus on <b>${topic}</b> (${h} hrs session)</div>`;
+            }
+            $('plan').innerHTML = out;
+        }
+
+        function updateStats() {
+            $('noteCount').textContent = JSON.parse(localStorage.getItem("notes") || "[]").length;
+            $('quizBest').textContent = (localStorage.getItem("bestQuiz") || 0) + "%";
+        }
+
+        updateStats();
+    </script>
+
+    <div id="authOverlay" class="auth-overlay">
+      <div class="auth-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><h2 style="font-size:22px">CollegeAI Pro</h2><p style="font-size:11px;color:var(--text-muted)">Secure student account</p></div>
+          <button class="logout-btn" onclick="closeAuth()">✕</button>
+        </div>
+        <div class="auth-tabs">
+          <button id="loginTab" class="active" onclick="setAuthMode('login')">Login</button>
+          <button id="registerTab" onclick="setAuthMode('register')">Register</button>
+        </div>
+        <input id="authName" class="input-field" placeholder="Full name" style="display:none">
+        <input id="authEmail" class="input-field" type="email" placeholder="Email">
+        <input id="authPassword" class="input-field" type="password" placeholder="Password">
+        <div id="authMsg" class="auth-msg"></div>
+        <button class="primary-btn" style="width:100%" onclick="submitAuth()">Continue</button>
+      </div>
+    </div>
+
+<script>
+/* ===== Full-stack overrides: these replace LocalStorage-only actions ===== */
+const __escape = v => String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const __API = window.COLLEGE_AI_API || (location.protocol === 'file:' ? 'http://localhost:5000/api' : '/api');
+let authToken = localStorage.getItem('collegeAiToken') || '';
+let currentUser = JSON.parse(localStorage.getItem('collegeAiUser') || 'null');
+let authMode='login';
+
+async function api(path, options={}){
+  const headers={'Content-Type':'application/json',...(options.headers||{})};
+  if(authToken) headers.Authorization='Bearer '+authToken;
+  const r=await fetch(__API+path,{...options,headers});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||'Request failed');
+  return d;
+}
+function openAuth(){$('authOverlay').classList.add('show')}
+function closeAuth(){$('authOverlay').classList.remove('show')}
+function setAuthMode(m){authMode=m;$('authName').style.display=m==='register'?'block':'none';$('loginTab').classList.toggle('active',m==='login');$('registerTab').classList.toggle('active',m==='register');$('authMsg').textContent=''}
+async function submitAuth(){
+  try{
+    const body={email:$('authEmail').value.trim(),password:$('authPassword').value};
+    if(authMode==='register') body.name=$('authName').value.trim();
+    const d=await api('/auth/'+authMode,{method:'POST',body:JSON.stringify(body)});
+    authToken=d.token;currentUser=d.user;
+    localStorage.setItem('collegeAiToken',authToken);localStorage.setItem('collegeAiUser',JSON.stringify(currentUser));
+    closeAuth();applyUser();await syncNotes();
+  }catch(e){$('authMsg').textContent=e.message}
+}
+function applyUser(){$('userName').textContent=currentUser?.name||'Guest'}
+function logout(){authToken='';currentUser=null;localStorage.removeItem('collegeAiToken');localStorage.removeItem('collegeAiUser');applyUser()}
+async function ensureAuth(){if(!authToken){openAuth();return false}return true}
+
+async function syncNotes(){
+  if(!authToken){return renderNotesLocal()}
+  try{
+    const d=await api('/notes'); 
+    $('notesList').innerHTML=d.notes.length?d.notes.map(v=>`<div class="note-item"><h4>${__escape(v.title)}</h4><p style="font-size:12px;color:var(--text-muted);margin:6px 0;">${__escape(v.content)}</p><small style="font-size:10px;color:var(--text-muted);">${new Date(v.created_at).toLocaleDateString()}</small></div>`).join(''):"<p style='color:var(--text-muted);font-size:12px;'>No saved notes yet.</p>";
+    $('noteCount').textContent=d.notes.length;
+  }catch(e){renderNotesLocal()}
+}
+function renderNotesLocal(){
+  const a=JSON.parse(localStorage.getItem("notes")||"[]");
+  $('notesList').innerHTML=a.length?a.map(v=>`<div class="note-item"><h4>${__escape(v.t)}</h4><p style="font-size:12px;color:var(--text-muted);margin:6px 0;">${__escape(v.n)}</p><small style="font-size:10px;color:var(--text-muted);">${__escape(v.d)}</small></div>`).join(''):"<p style='color:var(--text-muted);font-size:12px;'>Login to sync notes across devices.</p>";
+}
+async function saveNote(){
+  const t=$('ntitle').value.trim(),n=$('ntext').value.trim();if(!t||!n)return alert("Please fill both title and details.");
+  if(!await ensureAuth())return;
+  try{await api('/notes',{method:'POST',body:JSON.stringify({title:t,content:n})});$('ntitle').value='';$('ntext').value='';await syncNotes()}catch(e){alert(e.message)}
+}
+async function sendFull(){
+  const p=$('fullPrompt'),log=$('fullChatLog'),txt=p.value.trim();if(!txt)return;
+  log.innerHTML+=`<div class="chat-msg me">${__escape(txt)}</div>`;p.value='';
+  const wait=document.createElement('div');wait.className='chat-msg ai';wait.textContent='Thinking…';log.appendChild(wait);
+  try{const d=await api('/chat',{method:'POST',body:JSON.stringify({message:txt})});wait.textContent=d.reply}
+  catch(e){wait.textContent=answer(txt)}
+  log.scrollTop=log.scrollHeight;
+}
+async function sendSide(){
+  const p=$('sidePrompt'),log=$('sideChatLog'),txt=p.value.trim();if(!txt)return;
+  log.innerHTML+=`<div class="chat-msg me">${__escape(txt)}</div>`;p.value='';
+  try{const d=await api('/chat',{method:'POST',body:JSON.stringify({message:txt})});log.innerHTML+=`<div class="chat-msg ai">${__escape(d.reply)}</div>`}
+  catch(e){log.innerHTML+=`<div class="chat-msg ai">${__escape(answer(txt))}</div>`}
+  log.scrollTop=log.scrollHeight;
+}
+async function makePlan(){
+  const s=$('subject').value.trim()||"Computer Science Core",d=+$('days').value||7,h=+$('hours').value||2;
+  if(!await ensureAuth())return;
+  try{const r=await api('/planner',{method:'POST',body:JSON.stringify({subject:s,days:d,hours:h})});$('plan').innerHTML=`<h4 style="margin-bottom:10px;">Study Schedule for ${__escape(s)} (${d} Days)</h4>`+r.plan.map(x=>`<div class="note-item"><b>Day ${x.day}:</b> Focus on <b>${__escape(x.topic)}</b> (${x.hours} hrs session)</div>`).join('')}catch(e){alert(e.message)}
+}
+async function gradeQuiz(){
+  const filtered=qs.filter(q=>activeSubject==='All'||q[0]===activeSubject), answers=[];let score=0;
+  filtered.forEach((q,i)=>{const selected=document.querySelector(`input[name="q${i}"]:checked`);answers.push(selected?+selected.value:null);if(selected&&+selected.value===q[3])score++});
+  const pct=Math.round((score/filtered.length)*100);$('quizResult').innerText=`Score: ${score}/${filtered.length} (${pct}%)`;
+  localStorage.setItem('bestQuiz',Math.max(+localStorage.getItem('bestQuiz')||0,pct));updateStats();
+  if(authToken){try{await api('/quiz/score',{method:'POST',body:JSON.stringify({subject:activeSubject,score,total:filtered.length,percentage:pct})})}catch(e){}}
+}
+async function updateStats(){
+  if(authToken){try{const d=await api('/stats');$('noteCount').textContent=d.notes;$('quizBest').textContent=d.bestQuiz+'%';return}catch(e){}}
+  $('noteCount').textContent=JSON.parse(localStorage.getItem("notes")||"[]").length;
+  $('quizBest').textContent=(localStorage.getItem("bestQuiz")||0)+"%";
+}
+window.addEventListener('DOMContentLoaded',async()=>{applyUser();renderNotesLocal();await updateStats();try{await api('/health')}catch(e){}});
+</script>
+</body>
+</html>
